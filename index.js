@@ -16,6 +16,21 @@ const gameOptions = {
     })
 }
 
+const againOptions = {
+    reply_markup: JSON.stringify( {
+        inline_keyboard: [
+            [ {text: 'Играть еще раз', callback_data: '/again'}]
+        ]
+    })
+}
+
+const startGame = async (chatId) => {
+    await bot.sendMessage(chatId, 'Cейчас я загадаю цифру от 0 до 9, а ты должен ее отгадать');
+    const randNumber = Math.floor(Math.random() * 10);
+    chats[chatId] = randNumber;
+    await bot.sendMessage(chatId, 'Отгадывай', gameOptions);
+}
+
 bot.setMyCommands([
     {command: '/start', description: 'Начальное приветсвтвие'},
     {command: '/info', description: 'Информация о боте'},
@@ -29,19 +44,15 @@ bot.on('message', async msg => {
     if (text === '/start') return bot.sendMessage(chatId, 'Добро пожаловать в телеграм бот');
     if (text === '/info') return bot.sendMessage(chatId, 'Этот бот был создан для ....');
     if (text === '/game') {
-        await bot.sendMessage(chatId, 'Cейчас я загадаю цифру от 0 до 9, а ты должен ее отгадать');
-        const randNumber = Math.floor(Math.random() * 10);
-        chats[chatId] = randNumber;
-        return bot.sendMessage(chatId, 'Отгадывай', gameOptions);
+        startGame(chatId);
     }
     return bot.sendMessage(chatId, 'Я не понимаю, попробуй написать еще раз');
-    //console.log(msg);
 })
 
 bot.on('callback_query', async msg => {
     const data = msg.data;
     const chatId = msg.message.chat.id;
-    console.log(msg);
-    if (data == chats[chatId]) return bot.sendMessage(chatId, `Поздравляю, ты отгадал цифру ${chats[chatId]}`);
-    else return bot.sendMessage(chatId, `Ты не угадал, бот загадал цифру ${chats[chatId]}`);
+    if (data === '/again') startGame(chatId);
+    if (data == chats[chatId]) return bot.sendMessage(chatId, `Поздравляю, ты отгадал цифру ${chats[chatId]}`, againOptions);
+    else return bot.sendMessage(chatId, `Ты не угадал, бот загадал цифру ${chats[chatId]}`, againOptions);  
 })
