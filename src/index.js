@@ -1,6 +1,7 @@
 const TelegramApi = require("node-telegram-bot-api");
 const dotenv = require("dotenv");
 const { gameOptions, againOptions } = require("./options");
+const sequelize = require("./db");
 
 dotenv.config();
 
@@ -18,39 +19,42 @@ const startGame = async (chatId) => {
   await bot.sendMessage(chatId, "Отгадывай", gameOptions);
 };
 
-bot.setMyCommands([
-  { command: "/start", description: "Начальное приветсвтвие" },
-  { command: "/info", description: "Информация о боте" },
-  { command: "/game", description: "Игра угадай цыфру" },
-]);
+const start = () => {
+  bot.setMyCommands([
+    { command: "/start", description: "Начальное приветсвтвие" },
+    { command: "/info", description: "Информация о боте" },
+    { command: "/game", description: "Игра угадай цыфру" },
+  ]);
+  bot.on("message", async (msg) => {
+    const { text } = msg;
+    const chatId = msg.chat.id;
 
-bot.on("message", async (msg) => {
-  const { text } = msg;
-  const chatId = msg.chat.id;
+    if (text === "/start")
+      return bot.sendMessage(chatId, "Добро пожаловать в телеграм бот");
+    if (text === "/info")
+      return bot.sendMessage(chatId, "Этот бот был создан для ....");
+    if (text === "/game") {
+      return startGame(chatId);
+    }
+    return bot.sendMessage(chatId, "Я не понимаю, попробуй написать еще раз");
+  });
 
-  if (text === "/start")
-    return bot.sendMessage(chatId, "Добро пожаловать в телеграм бот");
-  if (text === "/info")
-    return bot.sendMessage(chatId, "Этот бот был создан для ....");
-  if (text === "/game") {
-    return startGame(chatId);
-  }
-  return bot.sendMessage(chatId, "Я не понимаю, попробуй написать еще раз");
-});
-
-bot.on("callback_query", async (msg) => {
-  const { data } = msg;
-  const chatId = msg.message.chat.id;
-  if (data === "/again") return startGame(chatId);
-  if (Number(data) === chats[chatId])
+  bot.on("callback_query", async (msg) => {
+    const { data } = msg;
+    const chatId = msg.message.chat.id;
+    if (data === "/again") return startGame(chatId);
+    if (Number(data) === chats[chatId])
+      return bot.sendMessage(
+        chatId,
+        `Поздравляю, ты отгадал цифру ${chats[chatId]}`,
+        againOptions
+      );
     return bot.sendMessage(
       chatId,
-      `Поздравляю, ты отгадал цифру ${chats[chatId]}`,
+      `Ты не угадал, бот загадал цифру ${chats[chatId]}`,
       againOptions
     );
-  return bot.sendMessage(
-    chatId,
-    `Ты не угадал, бот загадал цифру ${chats[chatId]}`,
-    againOptions
-  );
-});
+  });
+};
+
+start();
