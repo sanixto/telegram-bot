@@ -19,7 +19,13 @@ const startGame = async (chatId) => {
   await bot.sendMessage(chatId, "Отгадывай", gameOptions);
 };
 
-const start = () => {
+const start = async () => {
+  try {
+    await sequelize.authenticate();
+    await sequelize.sync();
+  } catch (e) {
+    console.log("Подключение к БД сломалось", e);
+  }
   bot.setMyCommands([
     { command: "/start", description: "Начальное приветсвтвие" },
     { command: "/info", description: "Информация о боте" },
