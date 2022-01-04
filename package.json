@@ -21,8 +21,10 @@
   "homepage": "https://github.com/sanixto/telegram-bot#readme",
   "dependencies": {
     "dotenv": "^10.0.0",
+    "mysql": "^2.18.1",
     "node-telegram-bot-api": "^0.56.0",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "sequelize": "^6.12.5"
   },
   "devDependencies": {
     "eslint": "^8.6.0",
