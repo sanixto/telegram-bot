@@ -6,6 +6,7 @@ const Chat = sequelize.define(
   {
     id: {
       type: DataTypes.STRING,
+      primaryKey: true,
       unique: true,
     },
     randNumber: {
