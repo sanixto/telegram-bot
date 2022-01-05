@@ -13,4 +13,5 @@ module.exports = new Sequelize(DB, DB_USER, DB_PASS, {
   host: DB_HOST,
   port: DB_PORT,
   dialect: "mysql",
+  timestamps: false,
 });
