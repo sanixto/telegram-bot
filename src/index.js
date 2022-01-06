@@ -25,13 +25,21 @@ const start = async () => {
 
   bot.on("message", async (msg) => {
     const { text } = msg;
+    const userId = msg.from.id;
     const chatId = msg.chat.id;
+    const typeChat = msg.chat.type;
+    console.log(msg);
 
     try {
-      if (text === "/start") return commands.startBot(bot, chatId);
-      if (text === "/info") return commands.showInfo(bot, chatId);
-      if (text === "/game") return commands.startGame(bot, chatId);
-      return bot.sendMessage(chatId, "Я не понимаю, попробуй написать еще раз");
+      if (typeChat === "private") {
+        if (text === "/start") return commands.startBot(bot, userId, chatId);
+        if (text === "/info") return commands.showInfo(bot, userId, chatId);
+        if (text === "/game") return commands.startGame(bot, chatId);
+        return bot.sendMessage(
+          chatId,
+          "Я не понимаю, попробуй написать еще раз"
+        );
+      }
     } catch (e) {
       console.log(e);
       bot.sendMessage(chatId, "Произошла какая-то ошибка");
@@ -41,9 +49,10 @@ const start = async () => {
 
   bot.on("callback_query", async (msg) => {
     const { data } = msg;
+    const userId = msg.from.id;
     const chatId = msg.message.chat.id;
-    const chat = await ChatModel.findOne({ id: chatId });
-    const user = await UserModel.findOne({ chatId });
+    const chat = await ChatModel.findOne({ where: { id: chatId } });
+    const user = await UserModel.findOne({ where: { id: userId, chatId } });
 
     if (data === "/again") return commands.startGame(bot, chatId);
     if (Number(data) === chat.randNumber) {

@@ -3,7 +3,7 @@ const { gameOptions } = require("./options");
 
 const startGame = async (bot, chatId) => {
   try {
-    const chat = await ChatModel.findOne({ id: chatId });
+    const chat = await ChatModel.findOne({ where: { id: chatId } });
     await bot.sendMessage(
       chatId,
       "Cейчас я загадаю цифру от 0 до 9, а ты должен ее отгадать"
@@ -18,24 +18,24 @@ const startGame = async (bot, chatId) => {
   }
 };
 
-const startBot = async (bot, chatId) => {
+const startBot = async (bot, userId, chatId) => {
   try {
-    const chat = await ChatModel.findOne({ id: chatId });
+    const chat = await ChatModel.findOne({ where: { id: chatId } });
     if (chat) {
       await bot.sendMessage(chatId, "C возвращением!");
       return;
     }
     await ChatModel.create({ id: chatId });
-    await UserModel.create({ chatId });
+    await UserModel.create({ id: userId, chatId });
     await bot.sendMessage(chatId, "Добро пожаловать в телеграм бот");
   } catch (e) {
     bot.sendMessage(chatId, "Произошла какая-то ошибка");
   }
 };
 
-const showInfo = async (bot, chatId) => {
+const showInfo = async (bot, userId, chatId) => {
   try {
-    const user = await UserModel.findOne({ chatId });
+    const user = await UserModel.findOne({ where: { id: userId, chatId } });
     bot.sendMessage(
       chatId,
       `У тебя ${user.right} правильных и ${user.wrong} неправильных ответов`
