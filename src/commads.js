@@ -19,24 +19,30 @@ const startGame = async (bot, chatId) => {
 };
 
 const startBot = async (bot, chatId) => {
-  const chat = await ChatModel.findOne({ id: chatId });
-  if (!chat) await ChatModel.create({ id: chatId });
-
-  const user = await UserModel.findOne({ chatId });
-  if (user) {
-    UserModel.decrement({ id: user.id });
-    await user.destroy();
+  try {
+    const chat = await ChatModel.findOne({ id: chatId });
+    if (chat) {
+      await bot.sendMessage(chatId, "C возвращением!");
+      return;
+    }
+    await ChatModel.create({ id: chatId });
+    await UserModel.create({ chatId });
+    await bot.sendMessage(chatId, "Добро пожаловать в телеграм бот");
+  } catch (e) {
+    bot.sendMessage(chatId, "Произошла какая-то ошибка");
   }
-  await UserModel.create({ chatId });
-  await bot.sendMessage(chatId, "Добро пожаловать в телеграм бот");
 };
 
 const showInfo = async (bot, chatId) => {
-  const user = await UserModel.findOne({ chatId });
-  await bot.sendMessage(
-    chatId,
-    `У тебя ${user.right} правильных и ${user.wrong} неправильных ответов`
-  );
+  try {
+    const user = await UserModel.findOne({ chatId });
+    bot.sendMessage(
+      chatId,
+      `У тебя ${user.right} правильных и ${user.wrong} неправильных ответов`
+    );
+  } catch (e) {
+    await bot.sendMessage(chatId, "Произошла какая-то ошибка");
+  }
 };
 
 module.exports = {
