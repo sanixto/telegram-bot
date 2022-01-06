@@ -1,29 +1,13 @@
 const TelegramApi = require("node-telegram-bot-api");
 const dotenv = require("dotenv");
-const { gameOptions, againOptions } = require("./options");
+const { againOptions } = require("./options");
 const sequelize = require("./db");
 const { UserModel, ChatModel } = require("./models/models");
+const commands = require("./commads");
 
 dotenv.config();
 
 const bot = new TelegramApi(process.env.TOKEN, { polling: true });
-
-const startGame = async (chatId) => {
-  try {
-    const chat = await ChatModel.findOne({ id: chatId });
-    await bot.sendMessage(
-      chatId,
-      "Cейчас я загадаю цифру от 0 до 9, а ты должен ее отгадать"
-    );
-    const randNumber = Math.floor(Math.random() * 10);
-    chat.randNumber = randNumber;
-    await chat.save();
-    await bot.sendMessage(chatId, "Отгадывай", gameOptions);
-  } catch (e) {
-    console.log(e);
-    bot.sendMessage(chatId, "Произшла какая-то ошибка");
-  }
-};
 
 const start = async () => {
   try {
@@ -44,28 +28,9 @@ const start = async () => {
     const chatId = msg.chat.id;
 
     try {
-      if (text === "/start") {
-        const chat = await ChatModel.findOne({ id: chatId });
-        if (!chat) await ChatModel.create({ id: chatId });
-
-        const user = await UserModel.findOne({ chatId });
-        if (user) {
-          UserModel.decrement({ id: user.id });
-          await user.destroy();
-        }
-        await UserModel.create({ chatId });
-        return bot.sendMessage(chatId, "Добро пожаловать в телеграм бот");
-      }
-      if (text === "/info") {
-        const user = await UserModel.findOne({ chatId });
-        return bot.sendMessage(
-          chatId,
-          `У тебя ${user.right} правильных и ${user.wrong} неправильных ответов`
-        );
-      }
-      if (text === "/game") {
-        return startGame(chatId);
-      }
+      if (text === "/start") return commands.startBot(bot, chatId);
+      if (text === "/info") return commands.showInfo(bot, chatId);
+      if (text === "/game") return commands.startGame(bot, chatId);
       return bot.sendMessage(chatId, "Я не понимаю, попробуй написать еще раз");
     } catch (e) {
       console.log(e);
@@ -80,7 +45,7 @@ const start = async () => {
     const chat = await ChatModel.findOne({ id: chatId });
     const user = await UserModel.findOne({ chatId });
 
-    if (data === "/again") return startGame(chatId);
+    if (data === "/again") return commands.startGame(bot, chatId);
     if (Number(data) === chat.randNumber) {
       user.right += 1;
       await bot.sendMessage(
