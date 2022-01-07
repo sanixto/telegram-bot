@@ -18,7 +18,7 @@ const startGame = async (bot, chatId) => {
   }
 };
 
-const startBot = async (bot, userId, chatId) => {
+const startBot = async (bot, chatId, typeChat = "private") => {
   try {
     const chat = await ChatModel.findOne({ where: { id: chatId } });
     if (chat) {
@@ -26,8 +26,9 @@ const startBot = async (bot, userId, chatId) => {
       return;
     }
     await ChatModel.create({ id: chatId });
-    await UserModel.create({ id: userId, chatId });
-    await bot.sendMessage(chatId, "Добро пожаловать в телеграм бот");
+    if (typeChat === "private")
+      await bot.sendMessage(chatId, "Добро пожаловать в телеграм бот");
+    else await bot.sendMessage(chatId, "Спасибо за приглашение)");
   } catch (e) {
     bot.sendMessage(chatId, "Произошла какая-то ошибка");
   }
@@ -36,12 +37,14 @@ const startBot = async (bot, userId, chatId) => {
 const showInfo = async (bot, userId, chatId) => {
   try {
     const user = await UserModel.findOne({ where: { id: userId, chatId } });
+    if (!user) await UserModel.create({ id: userId, chatId });
     bot.sendMessage(
       chatId,
       `У тебя ${user.right} правильных и ${user.wrong} неправильных ответов`
     );
   } catch (e) {
     await bot.sendMessage(chatId, "Произошла какая-то ошибка");
+    console.log(e);
   }
 };
 

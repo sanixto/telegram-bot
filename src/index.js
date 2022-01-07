@@ -32,7 +32,7 @@ const start = async () => {
 
     try {
       if (typeChat === "private") {
-        if (text === "/start") return commands.startBot(bot, userId, chatId);
+        if (text === "/start") return commands.startBot(bot, chatId);
         if (text === "/info") return commands.showInfo(bot, userId, chatId);
         if (text === "/game") return commands.startGame(bot, chatId);
         return bot.sendMessage(
@@ -53,6 +53,7 @@ const start = async () => {
     const chatId = msg.message.chat.id;
     const chat = await ChatModel.findOne({ where: { id: chatId } });
     const user = await UserModel.findOne({ where: { id: userId, chatId } });
+    if (!user) await UserModel.create({ id: userId, chatId });
 
     if (data === "/again") return commands.startGame(bot, chatId);
     if (Number(data) === chat.randNumber) {
