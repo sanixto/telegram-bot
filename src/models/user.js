@@ -8,16 +8,9 @@ const User = sequelize.define(
       type: DataTypes.INTEGER,
       primaryKey: true,
     },
-    chatId: {
+    username: {
       type: DataTypes.STRING,
-    },
-    right: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-    },
-    wrong: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
+      defaultValue: "noname",
     },
   },
   {
