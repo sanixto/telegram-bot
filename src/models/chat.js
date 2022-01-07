@@ -9,7 +9,7 @@ const Chat = sequelize.define(
       primaryKey: true,
       unique: true,
     },
-    name: {
+    title: {
       type: DataTypes.STRING,
       defaultValue: "noname",
     },

@@ -25,16 +25,16 @@ const start = async () => {
 
   bot.on("message", async (msg) => {
     const { text } = msg;
-    const userId = msg.from.id;
     const chatId = msg.chat.id;
-    const typeChat = msg.chat.type;
+    const chatType = msg.chat.type;
+
     console.log(msg);
 
     try {
-      if (typeChat === "private") {
-        if (text === "/start") return commands.startBot(bot, chatId);
-        if (text === "/info") return commands.showInfo(bot, userId, chatId);
-        if (text === "/game") return commands.startGame(bot, chatId);
+      if (chatType === "private") {
+        if (text === "/start") return commands.startBot(bot, msg);
+        if (text === "/info") return commands.showInfo(bot, msg);
+        if (text === "/game") return commands.startGame(bot, msg);
         return bot.sendMessage(
           chatId,
           "Я не понимаю, попробуй написать еще раз"
@@ -51,9 +51,10 @@ const start = async () => {
     const { data } = msg;
     const userId = msg.from.id;
     const chatId = msg.message.chat.id;
+    const { username } = msg.from.username;
     const chat = await ChatModel.findOne({ where: { id: chatId } });
-    const user = await UserModel.findOne({ where: { id: userId, chatId } });
-    if (!user) await UserModel.create({ id: userId, chatId });
+    const user = await UserModel.findOne({ where: { id: userId } });
+    if (!user) await UserModel.create({ id: userId, username });
 
     if (data === "/again") return commands.startGame(bot, chatId);
     if (Number(data) === chat.randNumber) {
