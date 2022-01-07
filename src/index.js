@@ -1,7 +1,7 @@
 const TelegramApi = require("node-telegram-bot-api");
 const dotenv = require("dotenv");
 const { againOptions } = require("./options");
-const sequelize = require("./db");
+const sequelize = require("./db/db");
 const { UserModel, ChatModel } = require("./models/models");
 const commands = require("./commads");
 
