@@ -2,8 +2,9 @@ const TelegramApi = require("node-telegram-bot-api");
 const dotenv = require("dotenv");
 const { againOptions } = require("./options");
 const sequelize = require("./db/db");
-const { UserModel, ChatModel } = require("./models/models");
+const { ChatModel } = require("./models/models");
 const commands = require("./commads");
+const associate = require("./db/associate");
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ const bot = new TelegramApi(process.env.TOKEN, { polling: true });
 
 const start = async () => {
   try {
+    associate();
     await sequelize.authenticate();
     await sequelize.sync();
   } catch (e) {
@@ -27,6 +29,7 @@ const start = async () => {
     const { text } = msg;
     const chatId = msg.chat.id;
     const chatType = msg.chat.type;
+    const botName = (await bot.getMe()).username;
 
     console.log(msg);
 
@@ -35,6 +38,15 @@ const start = async () => {
         if (text === "/start") return commands.startBot(bot, msg);
         if (text === "/info") return commands.showInfo(bot, msg);
         if (text === "/game") return commands.startGame(bot, msg);
+        return bot.sendMessage(
+          chatId,
+          "Я не понимаю, попробуй написать еще раз"
+        );
+      }
+      if (chatType === "group") {
+        if (text === "/start" || text === `/start@${botName}`) return commands.startBot(bot, msg);
+        if (text === "/info" || text === `/info@${botName}`) return commands.showInfo(bot, msg);
+        if (text === "/game" || text === `/game@${botName}`) return commands.startGame(bot, msg);
         return bot.sendMessage(
           chatId,
           "Я не понимаю, попробуй написать еще раз"
@@ -51,28 +63,30 @@ const start = async () => {
     const { data } = msg;
     const userId = msg.from.id;
     const chatId = msg.message.chat.id;
-    const { username } = msg.from.username;
-    const chat = await ChatModel.findOne({ where: { id: chatId } });
-    const user = await UserModel.findOne({ where: { id: userId } });
-    if (!user) await UserModel.create({ id: userId, username });
 
-    if (data === "/again") return commands.startGame(bot, chatId);
+    const chat = await ChatModel.findOne({ where: { id: chatId } });
+    const chatMembership = await commands.getChatMembershipModel(
+      userId,
+      chatId
+    );
+
+    if (data === "/again") return commands.startGame(bot, msg.message);
     if (Number(data) === chat.randNumber) {
-      user.right += 1;
+      chatMembership.right += 1;
       await bot.sendMessage(
         chatId,
         `Поздравляю, ты отгадал цифру ${chat.randNumber}`,
         againOptions
       );
     } else {
-      user.wrong += 1;
+      chatMembership.wrong += 1;
       await bot.sendMessage(
         chatId,
         `Ты не угадал, бот загадал цифру ${chat.randNumber}`,
         againOptions
       );
     }
-    await user.save();
+    await chatMembership.save();
     return 0;
   });
 };

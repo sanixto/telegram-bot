@@ -1,5 +1,24 @@
-const { ChatModel, UserModel } = require("./models/models");
+const {
+  ChatModel,
+  UserModel,
+  ChatMembershipModel,
+} = require("./models/models");
 const { gameOptions } = require("./options");
+
+const getUserModel = async (userId, username) => {
+  let user = await UserModel.findOne({ where: { id: userId } });
+  if (!user) user = await UserModel.create({ id: userId, username });
+  return user;
+};
+
+const getChatMembershipModel = async (userId, chatId) => {
+  let chatMembership = await ChatMembershipModel.findOne({
+    where: { userId, chatId },
+  });
+  if (!chatMembership)
+    chatMembership = await ChatMembershipModel.create({ userId, chatId });
+  return chatMembership;
+};
 
 const startGame = async (bot, msg) => {
   const chatId = msg.chat.id;
@@ -59,11 +78,12 @@ const showInfo = async (bot, msg) => {
   const chatId = msg.chat.id;
   const { username } = msg.from;
   try {
-    const user = await UserModel.findOne({ where: { id: userId } });
-    if (!user) await UserModel.create({ id: userId, username });
+    const user = await getUserModel(userId, username);
+    const chatMembership = await getChatMembershipModel(userId, chatId);
+
     bot.sendMessage(
       chatId,
-      `${user.username}, у тебя x правильных и x неправильных ответов`
+      `${user.username}, у тебя ${chatMembership.right} правильных и ${chatMembership.wrong} неправильных ответов`
     );
   } catch (e) {
     await bot.sendMessage(chatId, "Произошла какая-то ошибка");
@@ -75,4 +95,6 @@ module.exports = {
   startBot,
   startGame,
   showInfo,
+  getUserModel,
+  getChatMembershipModel,
 };
