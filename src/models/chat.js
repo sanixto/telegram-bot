@@ -9,6 +9,14 @@ const Chat = sequelize.define(
       primaryKey: true,
       unique: true,
     },
+    name: {
+      type: DataTypes.STRING,
+      defaultValue: "noname",
+    },
+    memberCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1,
+    },
     randNumber: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
