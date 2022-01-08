@@ -1,5 +1,7 @@
-const { Sequelize } = require("sequelize");
-const dotenv = require("dotenv");
+'use strict';
+
+const { Sequelize } = require('sequelize');
+const dotenv = require('dotenv');
 
 dotenv.config();
 
@@ -12,6 +14,6 @@ const { DB } = process.env;
 module.exports = new Sequelize(DB, DB_USER, DB_PASS, {
   host: DB_HOST,
   port: DB_PORT,
-  dialect: "mysql",
+  dialect: 'mysql',
   timestamps: false,
 });

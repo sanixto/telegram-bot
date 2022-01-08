@@ -1,8 +1,8 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../db/db");
+const { DataTypes } = require('sequelize');
+const sequelize = require('../db/db');
 
 const Chat = sequelize.define(
-  "chat",
+  'chat',
   {
     id: {
       type: DataTypes.STRING,
@@ -11,7 +11,7 @@ const Chat = sequelize.define(
     },
     title: {
       type: DataTypes.STRING,
-      defaultValue: "noname",
+      defaultValue: 'noname',
     },
     memberCount: {
       type: DataTypes.INTEGER,

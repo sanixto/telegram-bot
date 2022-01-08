@@ -1,30 +1,32 @@
+'use strict';
+
 const {
   UserModel,
   ChatModel,
   ChatMembershipModel,
-} = require("../models/models");
+} = require('../models/models');
 
 const associate = () => {
   UserModel.hasMany(ChatMembershipModel, {
-    foreignKey: "userId",
-    sourceKey: "id",
+    foreignKey: 'userId',
+    sourceKey: 'id',
   });
 
   ChatMembershipModel.belongsTo(UserModel, {
-    foreignKey: "userId",
-    as: "user",
-    targetKey: "id",
+    foreignKey: 'userId',
+    as: 'user',
+    targetKey: 'id',
   });
 
   ChatModel.hasMany(ChatMembershipModel, {
-    foreignKey: "chatId",
-    sourceKey: "id",
+    foreignKey: 'chatId',
+    sourceKey: 'id',
   });
 
   ChatMembershipModel.belongsTo(ChatModel, {
-    foreignKey: "chatId",
-    as: "chat",
-    targetKey: "id",
+    foreignKey: 'chatId',
+    as: 'chat',
+    targetKey: 'id',
   });
 };
 

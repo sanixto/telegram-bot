@@ -1,6 +1,6 @@
-const User = require("./user");
-const Chat = require("./chat");
-const ChatMembership = require("./chatMembership");
+const User = require('./user');
+const Chat = require('./chat');
+const ChatMembership = require('./chatMembership');
 
 module.exports = {
   UserModel: User,

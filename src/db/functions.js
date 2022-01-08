@@ -1,8 +1,10 @@
+'use strict';
+
 const {
   ChatModel,
   UserModel,
   ChatMembershipModel,
-} = require("../models/models");
+} = require('../models/models');
 
 const getUserModel = async (userId, username) => {
   let user = await UserModel.findOne({ where: { id: userId } });
@@ -18,13 +20,11 @@ const getChatMembershipModel = async (userId, chatId) => {
   return chatMembership;
 };
 
-const getChatModel = async (chatId) => {
-  return ChatModel.findOne({ where: { id: chatId } });
-};
+const getChatModel = async chatId =>
+  ChatModel.findOne({ where: { id: chatId } });
 
-const createChatModel = async (chatId, title, memberCount) => {
-  return ChatModel.create({ id: chatId, title, memberCount });
-};
+const createChatModel = async (chatId, title, memberCount) =>
+  ChatModel.create({ id: chatId, title, memberCount });
 
 module.exports = {
   getUserModel,

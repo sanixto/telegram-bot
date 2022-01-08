@@ -1,10 +1,12 @@
-const TelegramApi = require("node-telegram-bot-api");
-const dotenv = require("dotenv");
-const { againOptions } = require("./options");
-const sequelize = require("./db/db");
-const dbFunc = require("./db/functions");
-const commands = require("./commads");
-const associate = require("./db/associate");
+'use strict';
+
+const TelegramApi = require('node-telegram-bot-api');
+const dotenv = require('dotenv');
+const { againOptions } = require('./options');
+const sequelize = require('./db/db');
+const dbFunc = require('./db/functions');
+const commands = require('./commads');
+const associate = require('./db/associate');
 
 dotenv.config();
 
@@ -17,16 +19,16 @@ const start = async () => {
     await sequelize.authenticate();
     await sequelize.sync();
   } catch (e) {
-    console.log("Подключение к БД сломалось", e);
+    console.log('Подключение к БД сломалось', e);
   }
 
   bot.setMyCommands([
-    { command: "/start", description: "Начальное приветсвтвие" },
-    { command: "/info", description: "Информация о пользователе" },
-    { command: "/game", description: "Игра угадай цифру" },
+    { command: '/start', description: 'Начальное приветсвтвие' },
+    { command: '/info', description: 'Информация о пользователе' },
+    { command: '/game', description: 'Игра угадай цифру' },
   ]);
 
-  bot.on("message", async (msg) => {
+  bot.on('message', async msg => {
     const { text } = msg;
     const chatId = msg.chat.id;
     const chatType = msg.chat.type;
@@ -36,35 +38,35 @@ const start = async () => {
     console.log(msg);
 
     try {
-      if (chatType === "private") {
-        if (text === "/start") return commands.startBot(bot, msg);
-        if (text === "/info") return commands.showInfo(bot, msg);
-        if (text === "/game") return commands.startGame(bot, msg);
+      if (chatType === 'private') {
+        if (text === '/start') return commands.startBot(bot, msg);
+        if (text === '/info') return commands.showInfo(bot, msg);
+        if (text === '/game') return commands.startGame(bot, msg);
         return bot.sendMessage(
           chatId,
-          "Я не понимаю, попробуй написать еще раз"
+          'Я не понимаю, попробуй написать еще раз'
         );
       }
-      if (chatType === "group") {
-        if (text === "/start" || text === `/start@${botName}`)
+      if (chatType === 'group') {
+        if (text === '/start' || text === `/start@${botName}`)
           return commands.startBot(bot, msg);
-        if (text === "/info" || text === `/info@${botName}`)
+        if (text === '/info' || text === `/info@${botName}`)
           return commands.showInfo(bot, msg);
-        if (text === "/game" || text === `/game@${botName}`)
+        if (text === '/game' || text === `/game@${botName}`)
           return commands.startGame(bot, msg);
         return bot.sendMessage(
           chatId,
-          "Я не понимаю, попробуй написать еще раз"
+          'Я не понимаю, попробуй написать еще раз'
         );
       }
     } catch (e) {
       console.log(e);
-      bot.sendMessage(chatId, "Произошла какая-то ошибка");
+      bot.sendMessage(chatId, 'Произошла какая-то ошибка');
     }
     return 0;
   });
 
-  bot.on("callback_query", async (query) => {
+  bot.on('callback_query', async query => {
     const { data } = query;
     const chatId = query.message.chat.id;
     const messageId = query.message.message_id;
@@ -80,7 +82,7 @@ const start = async () => {
     const chat = await dbFunc.getChatModel(chatId);
     const chatMembership = await dbFunc.getChatMembershipModel(userId, chatId);
 
-    if (data === "/again") {
+    if (data === '/again') {
       await bot.editMessageText(query.message.text, {
         chat_id: chatId,
         message_id: messageId,
