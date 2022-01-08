@@ -23,11 +23,12 @@ const start = async () => {
   }
 
   bot.setMyCommands([
-    { command: '/start', description: 'Начальное приветсвтвие' },
-    { command: '/info', description: 'Информация о пользователе' },
+    { command: '/start', description: 'Начальное приветствие' },
     { command: '/game', description: 'Игра угадай цифру' },
-    { command: '/about', description: 'Информация о боте' },
+    { command: '/info', description: 'Информация о пользователе' },
     { command: '/top', description: 'Топ 10 игроков в группе' },
+    { command: '/about', description: 'Информация о боте' },
+    { command: '/help', description: 'Cписок всех комманд' },
   ]);
 
   bot.on('message', async msg => {
@@ -46,6 +47,7 @@ const start = async () => {
         if (text === '/game') return commands.startGame(bot, msg);
         if (text === '/about') return commands.aboutBot(bot, msg);
         if (text === '/top') return commands.showTop(bot, msg);
+        if (text === '/help') return commands.showCommands(bot, msg);
         return bot.sendMessage(
           chatId,
           'Я не понимаю, попробуй написать еще раз'
@@ -62,6 +64,8 @@ const start = async () => {
           return commands.aboutBot(bot, msg);
         if (text === '/top' || text === `/top@${botName}`)
           return commands.showTop(bot, msg);
+        if (text === '/help' || text === `/help@${botName}`)
+          return commands.showCommands(bot, msg);
         return bot.sendMessage(
           chatId,
           'Я не понимаю, попробуй написать еще раз'
