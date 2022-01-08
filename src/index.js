@@ -5,7 +5,7 @@ const dotenv = require('dotenv');
 const { againOptions } = require('./options');
 const sequelize = require('./db/db');
 const dbFunc = require('./db/functions');
-const commands = require('./commads');
+const commands = require('./commands');
 const associate = require('./db/associate');
 
 dotenv.config();
