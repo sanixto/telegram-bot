@@ -26,9 +26,13 @@ const getChatModel = async chatId =>
 const createChatModel = async (chatId, title, memberCount) =>
   ChatModel.create({ id: chatId, title, memberCount });
 
+const getChatMembers = async chatId =>
+  ChatMembershipModel.findAll({ where: { chatId } });
+
 module.exports = {
   getUserModel,
   getChatMembershipModel,
   getChatModel,
   createChatModel,
+  getChatMembers,
 };

@@ -27,6 +27,7 @@ const start = async () => {
     { command: '/info', description: 'Информация о пользователе' },
     { command: '/game', description: 'Игра угадай цифру' },
     { command: '/about', description: 'Информация о боте' },
+    { command: '/top', description: 'Топ 10 игроков в группе' },
   ]);
 
   bot.on('message', async msg => {
@@ -44,6 +45,7 @@ const start = async () => {
         if (text === '/info') return commands.showInfo(bot, msg);
         if (text === '/game') return commands.startGame(bot, msg);
         if (text === '/about') return commands.aboutBot(bot, msg);
+        if (text === '/top') return commands.showTop(bot, msg);
         return bot.sendMessage(
           chatId,
           'Я не понимаю, попробуй написать еще раз'
@@ -58,6 +60,8 @@ const start = async () => {
           return commands.startGame(bot, msg);
         if (text === '/about' || text === `/about@${botName}`)
           return commands.aboutBot(bot, msg);
+        if (text === '/top' || text === `/top@${botName}`)
+          return commands.showTop(bot, msg);
         return bot.sendMessage(
           chatId,
           'Я не понимаю, попробуй написать еще раз'

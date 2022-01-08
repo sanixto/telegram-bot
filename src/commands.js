@@ -38,12 +38,9 @@ const showInfo = async (bot, msg) => {
   try {
     const user = await dbFunc.getUserModel(userId, username);
     const chatMembership = await dbFunc.getChatMembershipModel(userId, chatId);
-
-    bot.sendMessage(
-      chatId,
-      `${user.username}, у тебя ${chatMembership.right} правильных 
-        и ${chatMembership.wrong} неправильных ответов`
-    );
+    let res = `${user.username}, у тебя ${chatMembership.right} правильных`;
+    res += `и ${chatMembership.wrong} неправильных ответов`;
+    bot.sendMessage(chatId, res);
   } catch (e) {
     await bot.sendMessage(chatId, 'Произошла какая-то ошибка');
     console.log(e);
@@ -79,9 +76,36 @@ const aboutBot = async (bot, msg) => {
   });
 };
 
+const showTop = async (bot, msg) => {
+  const chatType = msg.chat.type;
+  const chatId = msg.chat.id;
+  if (chatType !== 'group')
+    return bot.sendMessage(chatId, 'Вы находитесь не в не группе');
+
+  const chatMembers = await dbFunc.getChatMembers(chatId);
+
+  let html = `
+    <strong>Топ 10 игроков</strong><pre>
+  `;
+
+  for (const member of chatMembers) {
+    const user = await dbFunc.getUserModel(member.userId);
+    html += `${user.username}: ${member.right} правильных `;
+    html += `и ${member.wrong} неправильных`;
+    html += `
+  `;
+  }
+  html += `</pre>`;
+
+  await bot.sendMessage(chatId, html, {
+    parse_mode: 'HTML',
+  });
+};
+
 module.exports = {
   startBot,
   startGame,
   showInfo,
   aboutBot,
+  showTop,
 };
