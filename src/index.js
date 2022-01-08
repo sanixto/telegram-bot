@@ -11,6 +11,7 @@ dotenv.config();
 const bot = new TelegramApi(process.env.TOKEN, { polling: true });
 
 const start = async () => {
+  let userId;
   try {
     associate();
     await sequelize.authenticate();
@@ -30,6 +31,7 @@ const start = async () => {
     const chatId = msg.chat.id;
     const chatType = msg.chat.type;
     const botName = (await bot.getMe()).username;
+    userId = msg.from.id;
 
     console.log(msg);
 
@@ -63,10 +65,17 @@ const start = async () => {
   });
 
   bot.on("callback_query", async (query) => {
-    const { data } = query;
-    const userId = query.from.id;
     const chatId = query.message.chat.id;
+    const user = await commands.getUserModel(userId);
+    if (userId !== query.from.id)
+      return bot.sendMessage(
+        chatId,
+        `Играет ${user.username}. Запустите игру с помощью комманды /game`
+      );
+
+    const { data } = query;
     const messageId = query.message.message_id;
+    console.log(query);
 
     const chat = await ChatModel.findOne({ where: { id: chatId } });
     const chatMembership = await commands.getChatMembershipModel(
