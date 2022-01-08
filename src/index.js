@@ -44,9 +44,12 @@ const start = async () => {
         );
       }
       if (chatType === "group") {
-        if (text === "/start" || text === `/start@${botName}`) return commands.startBot(bot, msg);
-        if (text === "/info" || text === `/info@${botName}`) return commands.showInfo(bot, msg);
-        if (text === "/game" || text === `/game@${botName}`) return commands.startGame(bot, msg);
+        if (text === "/start" || text === `/start@${botName}`)
+          return commands.startBot(bot, msg);
+        if (text === "/info" || text === `/info@${botName}`)
+          return commands.showInfo(bot, msg);
+        if (text === "/game" || text === `/game@${botName}`)
+          return commands.startGame(bot, msg);
         return bot.sendMessage(
           chatId,
           "Я не понимаю, попробуй написать еще раз"
@@ -59,10 +62,11 @@ const start = async () => {
     return 0;
   });
 
-  bot.on("callback_query", async (msg) => {
-    const { data } = msg;
-    const userId = msg.from.id;
-    const chatId = msg.message.chat.id;
+  bot.on("callback_query", async (query) => {
+    const { data } = query;
+    const userId = query.from.id;
+    const chatId = query.message.chat.id;
+    const messageId = query.message.message_id;
 
     const chat = await ChatModel.findOne({ where: { id: chatId } });
     const chatMembership = await commands.getChatMembershipModel(
@@ -70,9 +74,16 @@ const start = async () => {
       chatId
     );
 
-    if (data === "/again") return commands.startGame(bot, msg.message);
+    if (data === "/again") {
+      await bot.editMessageText(query.message.text, {
+        chat_id: chatId,
+        message_id: messageId,
+      });
+      return commands.startGame(bot, query.message);
+    }
     if (Number(data) === chat.randNumber) {
       chatMembership.right += 1;
+      await bot.deleteMessage(chatId, messageId);
       await bot.sendMessage(
         chatId,
         `Поздравляю, ты отгадал цифру ${chat.randNumber}`,
@@ -80,6 +91,7 @@ const start = async () => {
       );
     } else {
       chatMembership.wrong += 1;
+      await bot.deleteMessage(chatId, messageId);
       await bot.sendMessage(
         chatId,
         `Ты не угадал, бот загадал цифру ${chat.randNumber}`,
