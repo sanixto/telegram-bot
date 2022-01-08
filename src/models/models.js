@@ -1,3 +1,5 @@
+'use strict';
+
 const User = require('./user');
 const Chat = require('./chat');
 const ChatMembership = require('./chatMembership');

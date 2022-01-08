@@ -41,7 +41,8 @@ const showInfo = async (bot, msg) => {
 
     bot.sendMessage(
       chatId,
-      `${user.username}, у тебя ${chatMembership.right} правильных и ${chatMembership.wrong} неправильных ответов`
+      `${user.username}, у тебя ${chatMembership.right} правильных 
+        и ${chatMembership.wrong} неправильных ответов`
     );
   } catch (e) {
     await bot.sendMessage(chatId, 'Произошла какая-то ошибка');
