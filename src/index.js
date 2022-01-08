@@ -90,12 +90,13 @@ const start = async () => {
     const chat = await dbFunc.getChatModel(chatId);
     const chatMembership = await dbFunc.getChatMembershipModel(userId, chatId);
 
-    if (data === '/again') {
+    if (data === '/again' || data === '/cancel') {
       await bot.editMessageText(query.message.text, {
         chat_id: chatId,
         message_id: messageId,
       });
-      return commands.startGame(bot, query.message);
+      if (data === '/again') return commands.startGame(bot, query.message);
+      else return;
     }
     if (Number(data) === chat.randNumber) {
       chatMembership.right += 1;
