@@ -28,13 +28,29 @@ $ npm start
 
 ## Commands:
 
+### Start the game "Guess the number". You need to choose a number from 0 to 9 
+```
+/game
+```
+
 ### Show the number of correct and incorrect user answers 
 ```
 /info
 ```
 
-### Start the game "Guess the number". You need to choose a number from 0 to 9 
+### Show top 10 players in the group
 ```
-/game
+/top
 ```
+
+### Show bot information
+```
+/about
+```
+
+### Show all commands
+```
+/help
+```
+
 The bot is available in private chats and groups
