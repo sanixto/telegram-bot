@@ -86,18 +86,12 @@ const start = async () => {
     const chatMembership = await dbFunc.getChatMembershipModel(userId, chatId);
 
     if (data === '/cancel') {
-      await bot.editMessageText(query.message.text, {
-        chat_id: chatId,
-        message_id: messageId,
-      });
+      await commands.stopGame(bot, query.message);
       playerId = null;
       return;
     }
     if (data === '/again') {
-      await bot.editMessageText(query.message.text, {
-        chat_id: chatId,
-        message_id: messageId,
-      });
+      await commands.stopGame(bot, query.message);
       return commands.restartGame(bot, query.message);
     }
     if (Number(data) === chat.randNumber) {
