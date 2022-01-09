@@ -5,7 +5,7 @@ const dotenv = require('dotenv');
 const { againOptions } = require('./options');
 const sequelize = require('./db/db');
 const dbFunc = require('./db/functions');
-const commands = require('./commands');
+const commands = require('./commands/commands');
 const associate = require('./db/associate');
 
 dotenv.config();
@@ -34,6 +34,7 @@ const start = async () => {
   bot.on('message', async msg => {
     const { text } = msg;
     const chatId = msg.chat.id;
+    const userId = msg.from.id;
     const chatType = msg.chat.type;
     const botName = (await bot.getMe()).username;
 
@@ -44,8 +45,11 @@ const start = async () => {
         return commands.startBot(bot, msg);
       if (text === '/info' || text === `/info@${botName}`)
         return commands.showInfo(bot, msg);
-      if (text === '/game' || text === `/game@${botName}`)
-        commands.startGame(bot, msg, null, playerId);
+      if (text === '/game' || text === `/game@${botName}`) {
+        await commands.startGame(bot, msg, null, playerId);
+        playerId = userId;
+        return;
+      }
       if (text === '/about' || text === `/about@${botName}`)
         return commands.aboutBot(bot, msg);
       if (text === '/top' || text === `/top@${botName}`)
@@ -71,6 +75,7 @@ const start = async () => {
 
     if (playerId && playerId !== userId) {
       const player = await dbFunc.getUserModel(playerId);
+      player.catch(err => console.log(err));
       return bot.sendMessage(
         chatId,
         `Играет ${player.username}. Запустите игру с помощью комманды /game`
@@ -79,7 +84,6 @@ const start = async () => {
 
     const chat = await dbFunc.getChatModel(chatId);
     const chatMembership = await dbFunc.getChatMembershipModel(userId, chatId);
-
 
     if (data === '/cancel') {
       await bot.editMessageText(query.message.text, {
@@ -94,7 +98,7 @@ const start = async () => {
         chat_id: chatId,
         message_id: messageId,
       });
-      return commands.startGame(bot, null, query, playerId);
+      return commands.restartGame(bot, query.message);
     }
     if (Number(data) === chat.randNumber) {
       dbFunc.updateChatMembershipModel(chatMembership,
