@@ -13,7 +13,7 @@ dotenv.config();
 const bot = new TelegramApi(process.env.TOKEN, { polling: true });
 
 const start = async () => {
-  let userId;
+  let playerId = null;
   try {
     associate();
     await sequelize.authenticate();
@@ -34,9 +34,9 @@ const start = async () => {
   bot.on('message', async msg => {
     const { text } = msg;
     const chatId = msg.chat.id;
+    const userId = msg.from.id;
     const chatType = msg.chat.type;
     const botName = (await bot.getMe()).username;
-    userId = msg.from.id;
 
     console.log(msg);
 
@@ -45,8 +45,22 @@ const start = async () => {
         return commands.startBot(bot, msg);
       if (text === '/info' || text === `/info@${botName}`)
         return commands.showInfo(bot, msg);
-      if (text === '/game' || text === `/game@${botName}`)
-        return commands.startGame(bot, msg);
+      if (text === '/game' || text === `/game@${botName}`) {
+        if (playerId) {
+          if (playerId === userId) return bot.sendMessage(
+            chatId,
+            'Ты уже в игре, нажми кнопку Отмена, чтобы закончить игру'
+          );
+          const player = await dbFunc.getUserModel(playerId);
+          return bot.sendMessage(
+            chatId,
+            `Подожите пока игрок ${player.username} закончит игру`
+          );
+        } else {
+          playerId = userId;
+          return commands.startGame(bot, msg);
+        }
+      }
       if (text === '/about' || text === `/about@${botName}`)
         return commands.aboutBot(bot, msg);
       if (text === '/top' || text === `/top@${botName}`)
@@ -67,25 +81,35 @@ const start = async () => {
   bot.on('callback_query', async query => {
     const { data } = query;
     const chatId = query.message.chat.id;
+    const userId = query.from.id;
     const messageId = query.message.message_id;
 
-    const user = await dbFunc.getUserModel(userId);
-    if (userId !== query.from.id)
+    if (playerId && playerId !== userId) {
+      const player = await dbFunc.getUserModel(playerId);
       return bot.sendMessage(
         chatId,
-        `Играет ${user.username}. Запустите игру с помощью комманды /game`
+        `Играет ${player.username}. Запустите игру с помощью комманды /game`
       );
+    }
 
     const chat = await dbFunc.getChatModel(chatId);
     const chatMembership = await dbFunc.getChatMembershipModel(userId, chatId);
 
-    if (data === '/again' || data === '/cancel') {
+
+    if (data === '/cancel') {
       await bot.editMessageText(query.message.text, {
         chat_id: chatId,
         message_id: messageId,
       });
-      if (data === '/again') return commands.startGame(bot, null, query);
-      else return;
+      playerId = null;
+      return;
+    }
+    if (data === '/again') {
+      await bot.editMessageText(query.message.text, {
+        chat_id: chatId,
+        message_id: messageId,
+      });
+      return commands.startGame(bot, null, query);
     }
     if (Number(data) === chat.randNumber) {
       dbFunc.updateChatMembershipModel(chatMembership,
