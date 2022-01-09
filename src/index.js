@@ -41,32 +41,22 @@ const start = async () => {
     console.log(msg);
 
     try {
-      if (chatType === 'private') {
-        if (text === '/start') return commands.startBot(bot, msg);
-        if (text === '/info') return commands.showInfo(bot, msg);
-        if (text === '/game') return commands.startGame(bot, msg);
-        if (text === '/about') return commands.aboutBot(bot, msg);
-        if (text === '/top') return commands.showTop(bot, msg);
-        if (text === '/help') return commands.showCommands(bot, msg);
-        return bot.sendMessage(
-          chatId,
-          'Я не понимаю, попробуй написать еще раз'
-        );
-      }
-      if (chatType === 'group') {
-        if (text === '/start' || text === `/start@${botName}`)
-          return commands.startBot(bot, msg);
-        if (text === '/info' || text === `/info@${botName}`)
-          return commands.showInfo(bot, msg);
-        if (text === '/game' || text === `/game@${botName}`)
-          return commands.startGame(bot, msg);
-        if (text === '/about' || text === `/about@${botName}`)
-          return commands.aboutBot(bot, msg);
-        if (text === '/top' || text === `/top@${botName}`)
-          return commands.showTop(bot, msg);
-        if (text === '/help' || text === `/help@${botName}`)
-          return commands.showCommands(bot, msg);
-      }
+      if (text === '/start' || text === `/start@${botName}`)
+        return commands.startBot(bot, msg);
+      if (text === '/info' || text === `/info@${botName}`)
+        return commands.showInfo(bot, msg);
+      if (text === '/game' || text === `/game@${botName}`)
+        return commands.startGame(bot, msg);
+      if (text === '/about' || text === `/about@${botName}`)
+        return commands.aboutBot(bot, msg);
+      if (text === '/top' || text === `/top@${botName}`)
+        return commands.showTop(bot, msg);
+      if (text === '/help' || text === `/help@${botName}`)
+        return commands.showCommands(bot, msg);
+      if (chatType === 'private') return bot.sendMessage(
+        chatId,
+        'Я не понимаю, попробуй написать еще раз'
+      );
     } catch (e) {
       console.log(e);
       bot.sendMessage(chatId, 'Произошла какая-то ошибка');
