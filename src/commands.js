@@ -53,7 +53,7 @@ const showInfo = async (bot, msg) => {
   }
 };
 
-const startGame = async (bot, msg, query) => {
+const startGame = async (bot, msg, query, playerId) => {
   let chatId, userId, username;
   if (msg) {
     chatId = msg.chat.id;
@@ -69,6 +69,18 @@ const startGame = async (bot, msg, query) => {
     const chat = await dbFunc.getChatModel(chatId);
     const user = await dbFunc.getUserModel(userId);
     if (!user) await dbFunc.createUserModel(userId, username);
+    if (playerId) {
+      if (playerId === userId) return bot.sendMessage(
+        chatId,
+        'Ты уже в игре, нажми кнопку Отмена, чтобы закончить игру'
+      );
+      const player = await dbFunc.getUserModel(playerId);
+      return bot.sendMessage(
+        chatId,
+        `Подожите пока игрок ${player.username} закончит игру`
+      );
+    }
+    playerId = userId;
     await bot.sendMessage(
       chatId,
       'Cейчас я загадаю цифру от 0 до 9, а ты должен ее отгадать'

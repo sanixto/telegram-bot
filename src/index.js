@@ -34,7 +34,6 @@ const start = async () => {
   bot.on('message', async msg => {
     const { text } = msg;
     const chatId = msg.chat.id;
-    const userId = msg.from.id;
     const chatType = msg.chat.type;
     const botName = (await bot.getMe()).username;
 
@@ -45,22 +44,8 @@ const start = async () => {
         return commands.startBot(bot, msg);
       if (text === '/info' || text === `/info@${botName}`)
         return commands.showInfo(bot, msg);
-      if (text === '/game' || text === `/game@${botName}`) {
-        if (playerId) {
-          if (playerId === userId) return bot.sendMessage(
-            chatId,
-            'Ты уже в игре, нажми кнопку Отмена, чтобы закончить игру'
-          );
-          const player = await dbFunc.getUserModel(playerId);
-          return bot.sendMessage(
-            chatId,
-            `Подожите пока игрок ${player.username} закончит игру`
-          );
-        } else {
-          playerId = userId;
-          return commands.startGame(bot, msg);
-        }
-      }
+      if (text === '/game' || text === `/game@${botName}`)
+        commands.startGame(bot, msg, null, playerId);
       if (text === '/about' || text === `/about@${botName}`)
         return commands.aboutBot(bot, msg);
       if (text === '/top' || text === `/top@${botName}`)
@@ -109,7 +94,7 @@ const start = async () => {
         chat_id: chatId,
         message_id: messageId,
       });
-      return commands.startGame(bot, null, query);
+      return commands.startGame(bot, null, query, playerId);
     }
     if (Number(data) === chat.randNumber) {
       dbFunc.updateChatMembershipModel(chatMembership,
