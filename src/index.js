@@ -66,10 +66,6 @@ const start = async () => {
           return commands.showTop(bot, msg);
         if (text === '/help' || text === `/help@${botName}`)
           return commands.showCommands(bot, msg);
-        return bot.sendMessage(
-          chatId,
-          'Я не понимаю, попробуй написать еще раз'
-        );
       }
     } catch (e) {
       console.log(e);
@@ -82,9 +78,8 @@ const start = async () => {
     const { data } = query;
     const chatId = query.message.chat.id;
     const messageId = query.message.message_id;
-    const { username } = query.from;
 
-    const user = await dbFunc.getUserModel(userId, username);
+    const user = await dbFunc.getUserModel(userId);
     if (userId !== query.from.id)
       return bot.sendMessage(
         chatId,
@@ -99,7 +94,7 @@ const start = async () => {
         chat_id: chatId,
         message_id: messageId,
       });
-      if (data === '/again') return commands.startGame(bot, query.message);
+      if (data === '/again') return commands.startGame(bot, null, query);
       else return;
     }
     if (Number(data) === chat.randNumber) {

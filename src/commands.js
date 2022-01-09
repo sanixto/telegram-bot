@@ -6,7 +6,6 @@ const { gameOptions } = require('./options');
 const startBot = async (bot, msg) => {
   const chatId = msg.chat.id;
   const chatType = msg.chat.type;
-  const { username } = msg.from;
   try {
     const chat = await dbFunc.getChatModel(chatId);
     if (chat) {
@@ -14,7 +13,8 @@ const startBot = async (bot, msg) => {
       return;
     }
     if (chatType === 'private') {
-      await dbFunc.createChatModel(chat, username);
+      const { username } = msg.from;
+      await dbFunc.createChatModel(chatId, username);
       await bot.sendMessage(
         chatId,
         `Добро пожаловать в телеграм бот ${username}`
@@ -37,6 +37,12 @@ const showInfo = async (bot, msg) => {
   const { username } = msg.from;
   try {
     const user = await dbFunc.getUserModel(userId, username);
+    if (!user) return bot.sendMessage(
+      chatId,
+      'Вы еще не играли в игру "Угадай число"'
+    );
+    if (username !== user.username)
+      await dbFunc.updateUserModel(user, username);
     const chatMembership = await dbFunc.getChatMembershipModel(userId, chatId);
     let res = `${user.username}, у тебя ${chatMembership.right} правильных`;
     res += `и ${chatMembership.wrong} неправильных ответов`;
@@ -47,17 +53,28 @@ const showInfo = async (bot, msg) => {
   }
 };
 
-const startGame = async (bot, msg) => {
-  const chatId = msg.chat.id;
+const startGame = async (bot, msg, query) => {
+  let chatId, userId, username;
+  if (msg) {
+    chatId = msg.chat.id;
+    userId = msg.from.id;
+    username = msg.from.username;
+  }
+  if (query) {
+    chatId = query.message.chat.id;
+    userId = query.from.id;
+    username = query.from.username;
+  }
   try {
     const chat = await dbFunc.getChatModel(chatId);
+    const user = await dbFunc.getUserModel(userId);
+    if (!user) await dbFunc.createUserModel(userId, username);
     await bot.sendMessage(
       chatId,
       'Cейчас я загадаю цифру от 0 до 9, а ты должен ее отгадать'
     );
     const randNumber = Math.floor(Math.random() * 10);
-    chat.randNumber = randNumber;
-    await chat.save();
+    await dbFunc.updateChatModel(chat, null, null, randNumber);
     await bot.sendMessage(chatId, 'Отгадывай', gameOptions);
   } catch (e) {
     console.log(e);

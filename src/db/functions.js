@@ -6,33 +6,54 @@ const {
   ChatMembershipModel,
 } = require('../models/models');
 
-const getUserModel = async (userId, username) => {
-  let user = await UserModel.findOne({ where: { id: userId } });
-  if (!user) user = await UserModel.create({ id: userId, username });
-  return user;
+const createUserModel = async (userId, username) =>
+  UserModel.create({ id: userId, username });
+
+const updateUserModel = async (user, username) => {
+  user.username = username;
+  await user.save();
 };
-const getChatMembershipModel = async (userId, chatId) => {
-  let chatMembership = await ChatMembershipModel.findOne({
-    where: { userId, chatId },
-  });
-  if (!chatMembership)
-    chatMembership = await ChatMembershipModel.create({ userId, chatId });
-  return chatMembership;
+
+const getUserModel = async userId =>
+  UserModel.findOne({ where: { id: userId } });
+
+const createChatMembershipModel = async (userId, chatId) =>
+  await ChatMembershipModel.create({ userId, chatId });
+
+const updateChatMembershipModel = async (chatMembership, right, wrong) => {
+  if (right) chatMembership.right = right;
+  if (wrong) chatMembership.wrong = wrong;
+  await chatMembership.save();
+};
+
+const getChatMembershipModel = async (userId, chatId) =>
+  ChatMembershipModel.findOne({ where: { userId, chatId } });
+
+const createChatModel = async (chatId, title, memberCount) =>
+  ChatModel.create({ id: chatId, title, memberCount });
+
+const updateChatModel = async (chat, title, memberCount, randNumber) => {
+  if (title) chat.title = title;
+  if (memberCount) chat.memberCount = memberCount;
+  if (randNumber) chat.randNumber = randNumber;
+  await chat.save();
 };
 
 const getChatModel = async chatId =>
   ChatModel.findOne({ where: { id: chatId } });
 
-const createChatModel = async (chatId, title, memberCount) =>
-  ChatModel.create({ id: chatId, title, memberCount });
-
 const getChatMembers = async chatId =>
   ChatMembershipModel.findAll({ where: { chatId } });
 
 module.exports = {
+  createUserModel,
+  createChatModel,
+  createChatMembershipModel,
+  updateUserModel,
+  updateChatModel,
+  updateChatMembershipModel,
   getUserModel,
   getChatMembershipModel,
   getChatModel,
-  createChatModel,
   getChatMembers,
 };
