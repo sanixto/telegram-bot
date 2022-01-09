@@ -98,7 +98,8 @@ const start = async () => {
       else return;
     }
     if (Number(data) === chat.randNumber) {
-      chatMembership.right += 1;
+      dbFunc.updateChatMembershipModel(chatMembership,
+        chatMembership.right + 1, null);
       await bot.deleteMessage(chatId, messageId);
       await bot.sendMessage(
         chatId,
@@ -106,7 +107,8 @@ const start = async () => {
         againOptions
       );
     } else {
-      chatMembership.wrong += 1;
+      dbFunc.updateChatMembershipModel(chatMembership,
+        null, chatMembership.wrong + 1);
       await bot.deleteMessage(chatId, messageId);
       await bot.sendMessage(
         chatId,
@@ -114,7 +116,6 @@ const start = async () => {
         againOptions
       );
     }
-    await chatMembership.save();
     return 0;
   });
 };
