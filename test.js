@@ -1,9 +1,8 @@
 'use strict';
 
-let i = 0;
 
-const up = par => par += 1;
+Promise.reject(new Error('efewr'));
 
-up(i);
-
-console.log(i);
+process.on('unhandledRejection', (reason, promise) => {
+  console.log('Error' + reason + promise);
+});

@@ -13,7 +13,6 @@ dotenv.config();
 const bot = new TelegramApi(process.env.TOKEN, { polling: true });
 
 const start = async () => {
-  let playerId = null;
   try {
     associate();
     await sequelize.authenticate();
@@ -31,10 +30,14 @@ const start = async () => {
     { command: '/help', description: 'Cписок всех комманд' },
   ]);
 
+  const player = {
+    id: null,
+    username: '',
+  };
+
   bot.on('message', async msg => {
     const { text } = msg;
     const chatId = msg.chat.id;
-    const userId = msg.from.id;
     const chatType = msg.chat.type;
     const botName = (await bot.getMe()).username;
 
@@ -45,11 +48,8 @@ const start = async () => {
         return commands.startBot(bot, msg);
       if (text === '/info' || text === `/info@${botName}`)
         return commands.showInfo(bot, msg);
-      if (text === '/game' || text === `/game@${botName}`) {
-        await commands.startGame(bot, msg, null, playerId);
-        playerId = userId;
-        return;
-      }
+      if (text === '/game' || text === `/game@${botName}`)
+        return commands.startGame(bot, msg, player);
       if (text === '/about' || text === `/about@${botName}`)
         return commands.aboutBot(bot, msg);
       if (text === '/top' || text === `/top@${botName}`)
@@ -73,9 +73,7 @@ const start = async () => {
     const userId = query.from.id;
     const messageId = query.message.message_id;
 
-    if (playerId && playerId !== userId) {
-      const player = await dbFunc.getUserModel(playerId);
-      player.catch(err => console.log(err));
+    if (player.id && player.id !== userId) {
       return bot.sendMessage(
         chatId,
         `Играет ${player.username}. Запустите игру с помощью комманды /game`
@@ -87,7 +85,7 @@ const start = async () => {
 
     if (data === '/cancel') {
       await commands.stopGame(bot, query.message);
-      playerId = null;
+      player.id = null;
       return;
     }
     if (data === '/again') {
@@ -115,6 +113,9 @@ const start = async () => {
     }
     return 0;
   });
+
+  process.on('unhandledRejection', reason =>
+    console.log(reason));
 };
 
 start();
